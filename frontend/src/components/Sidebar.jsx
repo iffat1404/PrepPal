@@ -8,16 +8,18 @@ import {
   DocumentTextIcon,
   CogIcon,
   QuestionMarkCircleIcon,
+  ArrowLeftOnRectangleIcon, // Import logout icon
 } from "@heroicons/react/24/outline"
 
-const Sidebar = ({ isOpen, onClose }) => {
+// Receive 'onLogoutRequest' as a prop
+const Sidebar = ({ isOpen, onClose, onLogoutRequest }) => {
   const location = useLocation()
 
   const menuItems = [
     { icon: HomeIcon, label: "Dashboard", path: "/dashboard" },
     { icon: PlayIcon, label: "Start Interview", path: "/interview/setup" },
     { icon: ChartBarIcon, label: "Analytics", path: "/analytics" },
-    { icon: DocumentTextIcon, label: "Interview History", path: "/history" },
+    { icon: DocumentTextIcon, label: "Interview History", path: "/interview/history" },
     { icon: CogIcon, label: "Settings", path: "/settings" },
     { icon: QuestionMarkCircleIcon, label: "Help", path: "/help" },
   ]
@@ -33,7 +35,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           isOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 lg:static lg:z-auto lg:h-auto flex flex-col`}
       >
-        <div className="flex-1 p-6">
+        {/* Make the container a flex column that pushes the logout button to the bottom */}
+        <div className="flex-1 p-6 flex flex-col justify-between">
           <nav className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon
@@ -56,10 +59,18 @@ const Sidebar = ({ isOpen, onClose }) => {
               )
             })}
           </nav>
-        </div>
 
-        {/* AI Assistant Card */}
-      
+          {/* Logout Button added at the bottom */}
+          <div>
+            <button
+              onClick={onLogoutRequest}
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-red-500/20 transition-all mt-4"
+            >
+              <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
+        </div>
       </aside>
     </>
   )

@@ -16,36 +16,54 @@ const InterviewPage = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [startTime, setStartTime] = useState(null)
-  const [isListening, setIsListening] = useState(false)
-
+  const [editableAnswer, setEditableAnswer] = useState("")
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition()
 
   useEffect(() => {
-    // Load interview session data
+    // This function now fetches the REAL questions from your backend
     const loadSession = async () => {
-      try {
-        // In a real app, you'd fetch the session data
-        // For now, we'll simulate it
-        setQuestions([
-          "Tell me about yourself and your experience with React.",
-          "How do you handle state management in large React applications?",
-          "Explain the difference between controlled and uncontrolled components.",
-          "What are React hooks and why are they useful?",
-          "How would you optimize the performance of a React application?",
-        ])
-        setStartTime(Date.now())
-        setIsLoading(false)
-      } catch (error) {
-        toast.error("Failed to load interview session")
+      if (!sessionId) {
+        toast.error("No session ID provided.")
         navigate("/dashboard")
+        return
+      }
+
+      setIsLoading(true)
+      try {
+        // Use the correct endpoint to get the session details
+        const response = await api.get(`/interview/session/${sessionId}`)
+        console.log("ACTUAL RESPONSE FROM BACKEND:", response.data);
+        if (response.data.status === "success") {
+
+          const fetchedQuestions = response.data.data.session.questions.map(q => q.question)
+          
+          if (fetchedQuestions.length === 0) {
+            toast.error("This interview session has no questions.")
+            navigate("/dashboard")
+            return
+          }
+
+          setQuestions(fetchedQuestions)
+          setStartTime(Date.now())
+        }
+      } catch (error) {
+        console.error("ERROR loading session:", error); 
+        toast.error("Failed to load interview session. Returning to dashboard.")
+        navigate("/dashboard")
+      } finally {
+        setIsLoading(false)
       }
     }
 
     loadSession()
-  }, [sessionId, navigate])
+  }, [sessionId, navigate]) // This effect depends on sessionId and navigate
 
   useEffect(() => {
-    // Read question aloud when it changes
+    setEditableAnswer(transcript)
+  }, [transcript])
+
+  useEffect(() => {
+    // This reads the question aloud when it changes. No changes needed here.
     if (questions.length > 0 && currentQuestionIndex < questions.length) {
       const utterance = new SpeechSynthesisUtterance(questions[currentQuestionIndex])
       utterance.rate = 0.8
@@ -59,19 +77,17 @@ const InterviewPage = () => {
       toast.error("Browser does not support speech recognition")
       return
     }
-
     resetTranscript()
+    setEditableAnswer("")
     SpeechRecognition.startListening({ continuous: true })
-    setIsListening(true)
   }
 
   const stopListening = () => {
     SpeechRecognition.stopListening()
-    setIsListening(false)
   }
 
   const submitAnswer = async () => {
-    if (!transcript.trim()) {
+    if (!editableAnswer.trim()) {
       toast.error("Please provide an answer before submitting")
       return
     }
@@ -83,7 +99,7 @@ const InterviewPage = () => {
       const response = await api.post("/interview/submit-answer", {
         sessionId,
         questionIndex: currentQuestionIndex,
-        answer: transcript,
+        answer: editableAnswer,
         timeSpent,
       })
 
@@ -96,12 +112,13 @@ const InterviewPage = () => {
         } else {
           setCurrentQuestionIndex((prev) => prev + 1)
           resetTranscript()
+          setEditableAnswer("") 
           setStartTime(Date.now())
           toast.success("Answer submitted!")
         }
       }
     } catch (error) {
-      toast.error("Failed to submit answer")
+      toast.error(error.response?.data?.message || "Failed to submit answer")
     } finally {
       setIsSubmitting(false)
     }
@@ -178,23 +195,17 @@ const InterviewPage = () => {
           </div>
 
           {/* Speech Controls */}
-          <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl border border-gray-700 mb-8">
+         <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-xl border border-gray-700 mb-8">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold">Your Answer</h3>
               <div className="flex space-x-4">
-                {!isListening ? (
-                  <button
-                    onClick={startListening}
-                    className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors"
-                  >
+                {!listening ? (
+                  <button onClick={startListening} className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors">
                     <MicrophoneIcon className="w-5 h-5" />
                     <span>Start Speaking</span>
                   </button>
                 ) : (
-                  <button
-                    onClick={stopListening}
-                    className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors"
-                  >
+                  <button onClick={stopListening} className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors">
                     <StopIcon className="w-5 h-5" />
                     <span>Stop Speaking</span>
                   </button>
@@ -217,18 +228,19 @@ const InterviewPage = () => {
             </div>
 
             {/* Transcript */}
-            <textarea
-              value={transcript}
-              readOnly
-              placeholder="Your speech will appear here..."
-              className="w-full h-32 px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      <textarea
+              value={editableAnswer} // Bind to the editable state
+              onChange={(e) => setEditableAnswer(e.target.value)} // Allow typing to update the state
+              // REMOVED the readOnly prop
+              placeholder={listening ? "Listening..." : "Speak or type your answer here... You can also write code."}
+              className="w-full h-40 px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
 
             {/* Submit Button */}
             <div className="mt-6 flex justify-end">
               <button
                 onClick={submitAnswer}
-                disabled={isSubmitting || !transcript.trim()}
+                disabled={isSubmitting || !editableAnswer.trim()}
                 className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isSubmitting ? (

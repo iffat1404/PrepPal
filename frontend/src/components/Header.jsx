@@ -1,18 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { useAuthStore } from "../store/authStore"
 import { Bars3Icon, XMarkIcon, UserCircleIcon, ArrowRightOnRectangleIcon, BellIcon } from "@heroicons/react/24/outline"
 
-const Header = () => {
+// Receive 'onLogoutRequest' as a prop
+const Header = ({ onLogoutRequest }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { user, isAuthenticated, logout } = useAuthStore()
-  const navigate = useNavigate()
+  const { user, isAuthenticated } = useAuthStore()
 
-  const handleLogout = () => {
-    logout()
-    navigate("/")
+  const handleMobileLogout = () => {
+    onLogoutRequest();
+    setIsMenuOpen(false);
   }
 
   return (
@@ -47,7 +47,8 @@ const Header = () => {
                     <UserCircleIcon className="w-5 h-5" />
                     <span className="text-sm">{user?.fullName}</span>
                   </div>
-                  <button onClick={handleLogout} className="text-gray-400 hover:text-white transition-colors">
+                  {/* Use the passed-in function */}
+                  <button onClick={onLogoutRequest} className="text-gray-400 hover:text-white transition-colors">
                     <ArrowRightOnRectangleIcon className="w-5 h-5" />
                   </button>
                 </div>
@@ -92,7 +93,8 @@ const Header = () => {
                 >
                   Practice
                 </Link>
-                <button onClick={handleLogout} className="block text-gray-300 hover:text-white transition-colors">
+                 {/* Use the passed-in function */}
+                <button onClick={handleMobileLogout} className="block text-gray-300 hover:text-white transition-colors">
                   Logout
                 </button>
               </div>

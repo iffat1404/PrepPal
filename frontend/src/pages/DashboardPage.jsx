@@ -1,4 +1,3 @@
-"use client"
 
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
@@ -18,7 +17,8 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline"
 import { getRandomTip } from "../utils/interviewTips"
-
+import { api } from "../utils/api" // Import your api utility
+import LoadingSpinner from "../components/LoadingSpinner"
 
 const DashboardPage = () => {
   const { user } = useAuthStore()
@@ -29,11 +29,28 @@ const DashboardPage = () => {
     setCurrentTip(getRandomTip()) // Pass no argument for the first tip
   }, [])
 
-  const recentSessions = [
-    { id: 1, topic: "React Development", score: 85, date: "2 hours ago", duration: "15 min" },
-    { id: 2, topic: "System Design", score: 78, date: "1 day ago", duration: "20 min" },
-    { id: 3, topic: "JavaScript Fundamentals", score: 92, date: "3 days ago", duration: "12 min" },
-  ]
+  const [recentSessions, setRecentSessions] = useState([])
+  const [isLoadingSessions, setIsLoadingSessions] = useState(true)
+ useEffect(() => {
+    setCurrentTip(getRandomTip())
+
+    // 2. Function to fetch real recent sessions
+    const fetchRecentSessions = async () => {
+      try {
+        // Call your API, but limit the results to 3 for the dashboard
+        const response = await api.get("/user/sessions?limit=3&sortBy=createdAt")
+        if (response.data.status === "success") {
+          setRecentSessions(response.data.data.sessions)
+        }
+      } catch (error) {
+        console.error("Failed to fetch recent sessions:", error)
+      } finally {
+        setIsLoadingSessions(false)
+      }
+    }
+
+    fetchRecentSessions()
+  }, [])
 
   const quickActions = [
     {
@@ -55,7 +72,7 @@ const DashboardPage = () => {
       description: "Review past interview sessions",
       icon: DocumentTextIcon,
       color: "green",
-      path: "/history",
+      path: "/interview/history",
     },
   ]
   const handleGetNewTip = () => {
@@ -78,7 +95,7 @@ const DashboardPage = () => {
               </h1>
               <p className="text-gray-400">Ready to practice and improve your interview skills?</p>
             </div>
-            <SearchBar placeholder="Search interviews, topics..." onSearch={setSearchQuery} className="lg:w-80" />
+
           </div>
         </div>
 
@@ -148,45 +165,61 @@ const DashboardPage = () => {
             {/* Recent Sessions */}
             <h2 className="text-xl font-semibold mb-6">Recent Sessions</h2>
             <Card className="p-6">
-              <div className="space-y-4">
-                {recentSessions.map((session) => (
-                  <div key={session.id} className="flex items-center justify-between p-4 bg-gray-800/30 rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                        <PlayIcon className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">{session.topic}</h3>
-                        <p className="text-sm text-gray-400">
-                          {session.date} • {session.duration}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div
-                        className={`text-lg font-semibold ${
-                          session.score >= 80
-                            ? "text-green-400"
-                            : session.score >= 60
-                              ? "text-yellow-400"
-                              : "text-red-400"
-                        }`}
-                      >
-                        {session.score}%
-                      </div>
-                      <p className="text-xs text-gray-400">Score</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {isLoadingSessions ? (
+                <div className="flex justify-center items-center h-40">
+                  <LoadingSpinner />
+                </div>
+              ) : recentSessions.length > 0 ? (
+                <div className="space-y-4">
+                  {/* 4. Map over the REAL recentSessions state */}
+                  {recentSessions.map((session) => {
+                    const score = session.feedback?.overallScore
+                    const scoreColor = score >= 80 ? "text-green-400" : score >= 60 ? "text-yellow-400" : "text-red-400"
+                    
+                    return (
+                      <Link to={`/summary/${session._id}`} key={session._id}>
+                        <div className="flex items-center justify-between p-4 bg-gray-800/30 rounded-lg hover:bg-gray-700/50 transition-colors">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                              <PlayIcon className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-medium">{session.topic}</h3>
+                              <p className="text-sm text-gray-400">
+                                {new Date(session.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          {score !== undefined ? (
+                            <div className="text-right">
+                              <div className={`text-lg font-semibold ${scoreColor}`}>
+                                {score}%
+                              </div>
+                              <p className="text-xs text-gray-400">Score</p>
+                            </div>
+                          ) : (
+                             <div className="text-right">
+                                <span className="text-sm text-gray-400 px-2 py-1 bg-gray-700 rounded-md">Pending</span>
+                             </div>
+                          )}
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center text-gray-400 py-10">
+                  <p>You haven't completed any interviews yet.</p>
+                  <p>Start one to see your history here!</p>
+                </div>
+              )}
               <div className="mt-6 text-center">
-                <Link to="/history" className="text-purple-400 hover:text-purple-300 transition-colors font-medium">
+                <Link to="/interview/history" className="text-purple-400 hover:text-purple-300 transition-colors font-medium">
                   View all sessions →
                 </Link>
               </div>
             </Card>
           </div>
-
           {/* Sidebar Content */}
           <div className="space-y-6">
             {/* Performance Chart */}

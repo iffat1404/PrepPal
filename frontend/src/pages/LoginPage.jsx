@@ -39,7 +39,8 @@ const LoginPage = () => {
         navigate("/dashboard")
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to login")
+      // This line correctly handles displaying login errors
+      toast.error(error.response?.data?.message || "Invalid credentials. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -48,7 +49,8 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-gray-950 relative overflow-hidden">
       <FloatingElements />
-      <Header />
+      {/* Passing a dummy function or nothing is fine here since user is not authenticated yet */}
+      <Header onLogoutRequest={() => {}} />
 
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-6 py-12">
         <div className="max-w-md w-full relative z-10">
@@ -101,16 +103,10 @@ const LoginPage = () => {
                     type="checkbox"
                     className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded bg-gray-800"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400">
-                    Remember me
-                  </label>
+                
                 </div>
 
-                <div className="text-sm">
-                  <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors">
-                    Forgot your password?
-                  </a>
-                </div>
+              
               </div>
 
               <button

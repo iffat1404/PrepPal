@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { Toaster } from "react-hot-toast"
+
 import { useAuthStore } from "./store/authStore"
 import HomePage from "./pages/HomePage"
 import SignupPage from "./pages/SignupPage"
@@ -11,8 +11,10 @@ import DashboardPage from "./pages/DashboardPage"
 import InterviewSetupPage from "./pages/InterviewSetupPage"
 import InterviewPage from "./pages/InterviewPage"
 import SummaryPage from "./pages/SummaryPage"
+import DetailedFeedbackPage from "./pages/DetailedFeedbackPage"
 import ProtectedRoute from "./components/ProtectedRoute"
 import LoadingSpinner from "./components/LoadingSpinner"
+import InterviewHistoryPage from "./pages/InterviewHistoryPage" 
 
 function App() {
   const { checkAuth, isLoading } = useAuthStore()
@@ -68,17 +70,24 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/summary/detailed/:sessionId"
+            element={
+              <ProtectedRoute>
+                <DetailedFeedbackPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/interview/history"
+            element={
+              <ProtectedRoute>
+                <InterviewHistoryPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: "#1f2937",
-              color: "#fff",
-              border: "1px solid #7c3aed",
-            },
-          }}
-        />
+       
       </div>
     </Router>
   )
