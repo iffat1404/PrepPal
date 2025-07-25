@@ -1,0 +1,65 @@
+# ====================
+# General
+# ====================
+node_modules/
+*.log
+*.tmp
+*.swp
+*.bak
+*.pid
+*.seed
+*.tgz
+*.zip
+.DS_Store
+Thumbs.db
+
+# ====================
+# Env files
+# ====================
+.env
+.env.*
+
+
+# ====================
+# Frontend (React)
+# ====================
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+
+# React environment files
+frontend/.env
+frontend/.env.*
+
+
+# ====================
+# Backend (Node/Express)
+# ====================
+backend/node_modules/
+backend/dist/
+backend/build/
+backend/logs/
+backend/.env
+backend/.env.*
+
+
+# ====================
+# Editor/IDE configs
+# ====================
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# ====================
+# Test coverage
+# ====================
+coverage/
+frontend/coverage/
+backend/coverage/
+
+# ====================
+# Optional: Docker, PM2, etc.
+# ====================
+docker-compose.override.yml
+*.pid
