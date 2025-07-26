@@ -27,6 +27,7 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+        console.log("Form submitted, default action PREVENTED. If you see this, the code is new.")
     setIsLoading(true)
 
     try {
