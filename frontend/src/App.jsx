@@ -34,6 +34,19 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-950 text-white">
+              {/* Add Toaster for sitewide notifications */}
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            background: "#1F2937", // gray-800
+            color: "#fff",
+            border: "1px solid #4B5563", // gray-600
+          },
+        }}
+      />
+
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/signup" element={<SignupPage />} />

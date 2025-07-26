@@ -1,9 +1,8 @@
-"use client"
+
 
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuthStore } from "../store/authStore"
-import { Toaster, toast } from "react-hot-toast"
 
 import Header from "./Header"
 import Sidebar from "./Sidebar"
@@ -32,18 +31,6 @@ const Layout = ({ children, showSidebar = false, showFooter = true }) => {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white relative">
-      {/* Add Toaster for sitewide notifications */}
-      <Toaster
-        position="top-right"
-        reverseOrder={false}
-        toastOptions={{
-          style: {
-            background: "#1F2937", // gray-800
-            color: "#fff",
-            border: "1px solid #4B5563", // gray-600
-          },
-        }}
-      />
 
       {/* Add the modal to the layout, controlled by state */}
       <ConfirmationModal
