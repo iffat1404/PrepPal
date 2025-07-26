@@ -15,7 +15,7 @@ import DetailedFeedbackPage from "./pages/DetailedFeedbackPage"
 import ProtectedRoute from "./components/ProtectedRoute"
 import LoadingSpinner from "./components/LoadingSpinner"
 import InterviewHistoryPage from "./pages/InterviewHistoryPage" 
-import NotFoundPage from "./pages/NotFoundPage"
+import NotFoundPage from "./pages/NotFound"
 function App() {
   const { checkAuth, isLoading } = useAuthStore()
 
