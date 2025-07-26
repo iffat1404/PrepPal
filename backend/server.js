@@ -35,15 +35,35 @@ const limiter = rateLimit({
 })
 app.use(limiter)
 
-// CORS configuration
+
+const allowedOrigins = [
+  process.env.CLIENT_URL, // Your Vercel frontend URL from .env
+  "http://localhost:5173", // Your local Vite dev server
+  "http://localhost:3000", // A common alternative local dev server
+]
+
 const corsOptions = {
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
-  credentials: true,
+  // 2. Use a function for the origin to check against the whitelist.
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like Postman, mobile apps, or curl)
+    if (!origin) return callback(null, true)
+    
+    // If the request origin is in our whitelist, allow it.
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      // Otherwise, block it.
+      callback(new Error("Not allowed by CORS"))
+    }
+  },
+  credentials: true, // This is essential for sending cookies (JWT) across domains.
   optionsSuccessStatus: 200,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
 }
+
 app.use(cors(corsOptions))
+// <<< CHANGE END >>>
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }))
