@@ -40,7 +40,16 @@ const LoginPage = () => {
       }
     } catch (error) {
       // This line correctly handles displaying login errors
-      toast.error(error.response?.data?.message || "Invalid credentials. Please try again.")
+        console.error("Login API call failed with error:", error)
+
+      // 2. Safely check if a specific message exists from our backend.
+      if (error.response && error.response.data && error.response.data.message) {
+   
+        toast.error(error.response.data.message)
+      } else {
+        // If it's a network error or any other kind of error, display a generic message.
+        toast.error("An error occurred. Please check your connection and try again.")
+      }
     } finally {
       setIsLoading(false)
     }
