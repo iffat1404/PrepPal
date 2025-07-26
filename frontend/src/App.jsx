@@ -86,8 +86,9 @@ function App() {
               </ProtectedRoute>
             }
           />
-        </Routes>
           <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+          
       </div>
     </Router>
   )
