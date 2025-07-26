@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-
+import { Toaster } from "react-hot-toast" 
 import { useAuthStore } from "./store/authStore"
 import HomePage from "./pages/HomePage"
 import SignupPage from "./pages/SignupPage"
