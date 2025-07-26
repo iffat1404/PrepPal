@@ -37,7 +37,7 @@ app.use(limiter)
 
 
 const allowedOrigins = [
-  "https://prep-pal-alpha.vercel.app",
+  "https://prep-gdzrkifmg-iffat1404s-projects.vercel.app",
   process.env.CLIENT_URL, // Your Vercel frontend URL from .env
   "http://localhost:5173", // Your local Vite dev server
   "http://localhost:3000", // A common alternative local dev server
